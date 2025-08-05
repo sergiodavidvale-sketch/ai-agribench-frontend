@@ -1,11 +1,10 @@
 'use client'
 import { useState } from 'react'
 import Select from 'react-select'
-import { Database, Tables, Enums } from '@/lib/supabase/database.types'
+import { Tables } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
 import { calculateAverage } from '@/lib/utils'
-import { Grid } from 'gridjs-react';
-
+import { Grid } from 'gridjs-react'
 
 // import { categoryOptions } from './categoryOptions'
 
@@ -97,4 +96,3 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		</div>
 	)
 }
- 
