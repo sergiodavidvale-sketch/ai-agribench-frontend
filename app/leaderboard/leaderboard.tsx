@@ -1,12 +1,11 @@
 'use client'
-import { useState } from 'react'
-import Select from 'react-select'
+import { ChangeEvent, useState } from 'react'
 import { Tables } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
 import { calculateAverage } from '@/lib/utils'
 import { Grid } from 'gridjs-react'
-
-// import { categoryOptions } from './categoryOptions'
+import Form from 'react-bootstrap/Form'
+import './leaderboard.css'
 
 const categoryOptions = [
 	{ value: 'Nutrition', label: 'Nutrition' },
@@ -22,12 +21,21 @@ interface LeaderboardProps {
 	evaluations: Tables<'evaluations'>[] // Replace 'any[]' with the actual type if known
 }
 
+interface StateInfo {
+	scores: Tables<'scores'>[]
+	selectedCategories: string[]
+}
+
 export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
-	const [scores, setScores] = useState(initialScores)
+	const [state, setState] = useState<StateInfo>({
+		scores: initialScores,
+		selectedCategories: categoryOptions.map((option) => option.value)
+	})
+
 	const supabase = createClient()
 	const data = []
-	if (scores.length > 0 && evaluations.length > 0) {
-		const groupedScores = Object.groupBy(scores, (item) => item.evaluation_id)
+	if (state.scores.length > 0 && evaluations.length > 0) {
+		const groupedScores = Object.groupBy(state.scores, (item) => item.evaluation_id)
 		const groupedEvaluations = Object.groupBy(evaluations, (item) => item.id)
 		for (const evaluationId in groupedScores) {
 			const evaluationGroup = groupedEvaluations[evaluationId]
@@ -61,6 +69,26 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		}
 	}
 
+	async function handleCheckChange(e: ChangeEvent<HTMLInputElement>, option: { value: string; label?: string }) {
+		const checked = e.target.checked
+
+		let categories
+		if (checked) {
+			categories = [...state.selectedCategories, option.value]
+		} else {
+			categories = state.selectedCategories.filter((cat) => cat !== option.value)
+		}
+
+		console.log('Selected categories:', categories)
+		const newScores = (await supabase.from('scores').select('*').overlaps('categories', categories)).data ?? []
+
+		setState((prevState) => ({
+			...prevState,
+			selectedCategories: categories,
+			scores: newScores
+		}))
+	}
+
 	const columns = [
 		{ name: 'Judge Model', sort: true },
 		{ name: 'Subject Model', sort: true },
@@ -70,25 +98,46 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		{ name: 'Relevance', sort: true }
 	]
 
-	async function getScores(categories: string[]) {
-		const newScores = (await supabase.from('scores').select('*').overlaps('categories', categories)).data ?? []
-		setScores(newScores)
-	}
-
 	return (
-		<div className='h-full w-full'>
-			<Select
-				onChange={(options) => {
-					getScores(options.map((option) => option.value))
-				}}
-				instanceId='category-select'
-				defaultValue={categoryOptions}
-				isMulti
-				options={categoryOptions}
-				className='basic-multi-select'
-				classNamePrefix='select'
-			/>
+		<div
+			className='h-full d-flex flex-column'
+			style={{
+				backgroundColor: '#D3CDC6',
+				color: '#171717',
+				borderRadius: '8px'
+			}}>
+			<Form
+				style={{ paddingTop: '4px' , paddingBottom: '0' }}
+				className='pl-2 d-flex flex-row'>
+				{categoryOptions.map((option) => (
+					<Form.Check
+						className='pr-3'
+						onChange={(e) => {
+							handleCheckChange(e, option)
+						}}
+						style={{
+							color: '#171717'
+						}}
+						key={option.value}
+						defaultChecked={true}
+						label={option.label}
+						name={option.label}
+						id={`inline-${option.value}-`}
+					/>
+				))}
+			</Form>
+
 			<Grid
+				style={{
+					td: {
+						color: '#171717',
+						backgroundColor: '#D3CDC6'
+					},
+					th: {
+						color: '#171717',
+						backgroundColor: '#C8C6C7'
+					}
+				}}
 				data={data}
 				sort={true}
 				columns={columns}

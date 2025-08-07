@@ -1,19 +1,17 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
-import { ThemeProvider } from 'next-themes'
+import { Source_Sans_3 } from 'next/font/google'
+import './bootstrap.scss'
 import './globals.css'
-import './bootstrap.css'
-
-const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
+const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/leaderboard` : 'http://localhost:3000/leaderboard'
 
 export const metadata: Metadata = {
 	metadataBase: new URL(defaultUrl),
-	title: 'Next.js and Supabase Starter Kit',
-	description: 'The fastest way to build apps with Next.js and Supabase'
+	title: 'AIAgribench',
+	description: 'Vikram if you see this tell me what it should be'
 }
 
-const geistSans = Geist({
-	variable: '--font-geist-sans',
+const sourceSans = Source_Sans_3({
+	variable: '--font-source-sans',
 	display: 'swap',
 	subsets: ['latin']
 })
@@ -27,13 +25,10 @@ export default function RootLayout({
 		<html
 			lang='en'
 			suppressHydrationWarning>
-			<body className={`${geistSans.className} antialiased h-100`}>
-				<ThemeProvider
-					attribute='class'
-					defaultTheme='system'
-					enableSystem>
-					{children}
-				</ThemeProvider>
+			<body
+				className={`${sourceSans.className} antialiased h-100`}
+				style={{ backgroundColor: '#D3CDC6' }}>
+				{children}
 			</body>
 		</html>
 	)
