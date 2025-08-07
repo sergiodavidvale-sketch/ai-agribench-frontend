@@ -3,6 +3,7 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import { createClient } from '@/lib/supabase/server'
 import axios from 'axios'
+import "bootstrap/dist/css/bootstrap.min.css"
 
 export default async function ProtectedPage() {
 	const supabase = await createClient()
@@ -48,6 +49,8 @@ export default async function ProtectedPage() {
 				name='input'
 				as='textarea'
 				placeholder='input'
+				defaultValue={"{}"}
+				rows={15}
 			/>
 			<Button
 				variant='primary'
