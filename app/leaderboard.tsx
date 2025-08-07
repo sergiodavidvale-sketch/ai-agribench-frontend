@@ -5,12 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { calculateAverage } from '@/lib/utils'
 import { Grid } from 'gridjs-react'
 import Form from 'react-bootstrap/Form'
-import './leaderboard.css'
 
 const categoryOptions = [
 	{ value: 'Nutrition', label: 'Nutrition' },
+	{ value: 'Weeds', label: 'Weeds' },
 	{ value: 'Pests_and_Pest_management', label: 'Pests' },
-	{ value: 'Climate_and_Weather_risk', label: 'Climate' },
+	{ value: 'Climate_and_Weather_risk', label: 'Weather' },
 	{ value: 'Sustainability', label: 'Sustainability' },
 	{ value: 'Water', label: 'Water' },
 	{ value: 'Crop_management_decisions', label: 'Crop Management' }
@@ -79,7 +79,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 			categories = state.selectedCategories.filter((cat) => cat !== option.value)
 		}
 
-		console.log('Selected categories:', categories)
 		const newScores = (await supabase.from('scores').select('*').overlaps('categories', categories)).data ?? []
 
 		setState((prevState) => ({
@@ -107,7 +106,7 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				borderRadius: '8px'
 			}}>
 			<Form
-				style={{ paddingTop: '4px' , paddingBottom: '0' }}
+				style={{ paddingTop: '4px', paddingBottom: '0' }}
 				className='pl-2 d-flex flex-row'>
 				{categoryOptions.map((option) => (
 					<Form.Check
