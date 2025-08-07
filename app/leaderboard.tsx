@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useRef, useState } from 'react'
 import { Tables } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
 import { calculateAverage } from '@/lib/utils'
@@ -21,21 +21,13 @@ interface LeaderboardProps {
 	evaluations: Tables<'evaluations'>[] // Replace 'any[]' with the actual type if known
 }
 
-interface StateInfo {
-	scores: Tables<'scores'>[]
-	selectedCategories: string[]
-}
-
 export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
-	const [state, setState] = useState<StateInfo>({
-		scores: initialScores,
-		selectedCategories: categoryOptions.map((option) => option.value)
-	})
-
+	const [scores, setScores] = useState<Tables<'scores'>[]>(initialScores)
+	const selectedCategories = useRef(categoryOptions.map((option) => option.value))
 	const supabase = createClient()
 	const data = []
-	if (state.scores.length > 0 && evaluations.length > 0) {
-		const groupedScores = Object.groupBy(state.scores, (item) => item.evaluation_id)
+	if (scores.length > 0 && evaluations.length > 0) {
+		const groupedScores = Object.groupBy(scores, (item) => item.evaluation_id)
 		const groupedEvaluations = Object.groupBy(evaluations, (item) => item.id)
 		for (const evaluationId in groupedScores) {
 			const evaluationGroup = groupedEvaluations[evaluationId]
@@ -69,23 +61,65 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		}
 	}
 
-	async function handleCheckChange(e: ChangeEvent<HTMLInputElement>, option: { value: string; label?: string }) {
-		const checked = e.target.checked
-
-		let categories
-		if (checked) {
-			categories = [...state.selectedCategories, option.value]
-		} else {
-			categories = state.selectedCategories.filter((cat) => cat !== option.value)
+	function scoresDifferent(
+		scores: {
+			accuracy: number
+			categories: string[]
+			completeness: number
+			conciseness: number
+			created_at: string
+			evaluation_id: number
+			id: number
+			question_id: string
+			relevance: number
+		}[],
+		newScores: {
+			accuracy: number
+			categories: string[]
+			completeness: number
+			conciseness: number
+			created_at: string
+			evaluation_id: number
+			id: number
+			question_id: string
+			relevance: number
+		}[]
+	) {
+		try {
+			for (let i = 0; i < scores.length; i++) {
+				const score = scores[i]
+				const newScore = newScores[i]
+				if (
+					score.accuracy !== newScore.accuracy ||
+					score.completeness !== newScore.completeness ||
+					score.conciseness !== newScore.conciseness ||
+					score.relevance !== newScore.relevance ||
+					!score.categories.every((cat) => newScore.categories.includes(cat)) ||
+					!newScore.categories.every((cat) => score.categories.includes(cat))
+				) {
+					return true
+				}
+			}
+		} catch (error) {
+			console.error('Error comparing scores:', error)
 		}
+		return false
+	}
+
+	async function handleCheckChange(e: ChangeEvent<HTMLInputElement>, option: { value: string; label?: string }) {
+		let categories
+		if (e.target.checked) {
+			categories = [...selectedCategories.current, option.value]
+		} else {
+			categories = selectedCategories.current.filter((cat) => cat !== option.value)
+		}
+		selectedCategories.current = categories
 
 		const newScores = (await supabase.from('scores').select('*').overlaps('categories', categories)).data ?? []
 
-		setState((prevState) => ({
-			...prevState,
-			selectedCategories: categories,
-			scores: newScores
-		}))
+		if (scoresDifferent(scores, newScores)) {
+			setScores(newScores)
+		}
 	}
 
 	const columns = [
@@ -125,7 +159,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 					/>
 				))}
 			</Form>
-
 			<Grid
 				style={{
 					td: {

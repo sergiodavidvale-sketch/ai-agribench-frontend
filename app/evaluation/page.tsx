@@ -28,6 +28,11 @@ export default async function ProtectedPage() {
 	}
 
 	return (
+		
+
+<div>
+	<iframe src="https://ai-agribench-frontend.vercel.app/"/>
+
 		<Form action={submitForm}>
 			<Form.Control
 				name='judgeModel'
@@ -58,5 +63,6 @@ export default async function ProtectedPage() {
 				Submit
 			</Button>
 		</Form>
+	</div>
 	)
 }
