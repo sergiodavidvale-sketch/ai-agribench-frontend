@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import { createClient } from '@/lib/supabase/server'
 import axios from 'axios'
-import "bootstrap/dist/css/bootstrap.min.css"
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 export default async function ProtectedPage() {
 	const supabase = await createClient()
@@ -15,7 +15,8 @@ export default async function ProtectedPage() {
 
 	async function submitForm(formData: FormData) {
 		'use server'
-		const url = 'http://127.0.0.1:5000/evaluate'
+		const backendUrl = process.env.BACKEND_URL
+		const url = `${backendUrl}/evaluate`
 		const numProcesses = formData.get('numProcesses')
 		console.log(numProcesses)
 		await axios.post(url, {
@@ -28,11 +29,6 @@ export default async function ProtectedPage() {
 	}
 
 	return (
-		
-
-<div>
-	<iframe src="https://ai-agribench-frontend.vercel.app/"/>
-
 		<Form action={submitForm}>
 			<Form.Control
 				name='judgeModel'
@@ -54,7 +50,7 @@ export default async function ProtectedPage() {
 				name='input'
 				as='textarea'
 				placeholder='input'
-				defaultValue={"{}"}
+				defaultValue={'{}'}
 				rows={15}
 			/>
 			<Button
@@ -63,6 +59,5 @@ export default async function ProtectedPage() {
 				Submit
 			</Button>
 		</Form>
-	</div>
 	)
 }
