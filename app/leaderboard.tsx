@@ -89,6 +89,12 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 			for (let i = 0; i < scores.length; i++) {
 				const score = scores[i]
 				const newScore = newScores[i]
+
+				if (!score || !newScore)
+				{
+					return true
+				}
+
 				if (
 					score.accuracy !== newScore.accuracy ||
 					score.completeness !== newScore.completeness ||
@@ -106,7 +112,10 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		return false
 	}
 
-	async function handleCheckChange(e: ChangeEvent<HTMLInputElement>, option: { value: string; label?: string }) {
+	async function handleCheckChange(
+		e: ChangeEvent<HTMLInputElement>,
+		option: { value: string; label?: string }
+	) {
 		let categories
 		if (e.target.checked) {
 			categories = [...selectedCategories.current, option.value]
@@ -115,7 +124,9 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		}
 		selectedCategories.current = categories
 
-		const newScores = (await supabase.from('scores').select('*').overlaps('categories', categories)).data ?? []
+		const newScores =
+			(await supabase.from('scores').select('*').overlaps('categories', categories)).data ??
+			[]
 
 		if (scoresDifferent(scores, newScores)) {
 			setScores(newScores)
