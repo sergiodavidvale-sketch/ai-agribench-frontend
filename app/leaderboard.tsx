@@ -150,6 +150,7 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				color: '#171717',
 				borderRadius: '8px'
 			}}>
+			Dummy Data
 			<Form
 				style={{ paddingTop: '4px', paddingBottom: '0' }}
 				className='pl-2 d-flex flex-row'>
