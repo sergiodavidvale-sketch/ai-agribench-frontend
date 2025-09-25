@@ -4,7 +4,8 @@ import { Tables } from '@/lib/supabase/database.types'
 import { calculateAverage } from '@/lib/utils'
 import { Grid } from 'gridjs-react'
 import Form from 'react-bootstrap/Form'
-import { FaCircleExclamation } from 'react-icons/fa6'
+import dynamic from 'next/dynamic'
+import 'datatables.net-dt/css/dataTables.dataTables.css'
 
 const categoryOptions = [
 	{ value: 'Nutrition', label: 'Nutrition' },
@@ -15,6 +16,19 @@ const categoryOptions = [
 	{ value: 'Water', label: 'Water' },
 	{ value: 'Crop_management_decisions', label: 'Crop Management' }
 ]
+
+const DataTable = dynamic(
+	async () => {
+		const dtReact = import('datatables.net-react')
+		const dtNet = import('datatables.net-dt')
+
+		const [reactMod, dtNetMod] = await Promise.all([dtReact, dtNet])
+
+		reactMod.default.use(dtNetMod.default)
+		return reactMod.default
+	},
+	{ ssr: false }
+)
 
 interface LeaderboardProps {
 	initialScores: Tables<'scores'>[] // Replace 'any[]' with the actual type if known
@@ -109,10 +123,22 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				color: '#171717',
 				borderRadius: '8px'
 			}}>
-			
-			<span style={{ fontSize: '50px', color: 'red' }}>
-				!!!Dummy Data!!!
-			</span>
+			<span style={{ fontSize: '50px', color: 'red' }}>!!!Dummy Data!!!</span>
+
+			<DataTable
+				data={data}
+				options={{ searching: false, paging: false, info: false, ordering: true }}>
+				<thead>
+					<tr>
+						<th>Judge Model</th>
+						<th>Subject Model</th>
+						<th>Accuracy</th>
+						<th>Completeness</th>
+						<th>Conciseness</th>
+						<th>Relevance</th>
+					</tr>
+				</thead>
+			</DataTable>
 
 			<Form
 				style={{ paddingTop: '4px', paddingBottom: '0' }}
