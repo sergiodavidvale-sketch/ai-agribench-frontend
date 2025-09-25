@@ -109,6 +109,7 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				color: '#171717',
 				borderRadius: '8px'
 			}}>
+			
 			<span style={{ fontSize: '50px', color: 'red' }}>
 				!!!Dummy Data!!!
 			</span>
