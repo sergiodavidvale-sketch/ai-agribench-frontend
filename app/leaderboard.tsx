@@ -1,10 +1,8 @@
 'use client'
-import { ChangeEvent, useRef, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { Tables } from '@/lib/supabase/database.types'
-import { createClient } from '@/lib/supabase/client'
 import { calculateAverage } from '@/lib/utils'
 import { Grid } from 'gridjs-react'
-import $ from 'jquery'
 import Form from 'react-bootstrap/Form'
 
 const categoryOptions = [
@@ -22,99 +20,53 @@ interface LeaderboardProps {
 	evaluations: Tables<'evaluations'>[] // Replace 'any[]' with the actual type if known
 }
 
+function getDataFromScores(scores: Tables<'scores'>[], evaluations: Tables<'evaluations'>[]) {
+	const data: string[][] = []
+	const groupedScores = Object.groupBy(scores, (item) => item.evaluation_id)
+	const groupedEvaluations = Object.groupBy(evaluations, (item) => item.id)
+
+	for (const evaluationId in groupedScores) {
+		const evaluationGroup = groupedEvaluations[evaluationId]
+		const evaluationScores = groupedScores[evaluationId]
+
+		if (!evaluationGroup || !evaluationScores || evaluationGroup.length === 0) continue
+
+		const evaluation = evaluationGroup[0]
+		const accuracy: number[] = []
+		const completeness: number[] = []
+		const conciseness: number[] = []
+		const relevance: number[] = []
+
+		if (evaluationScores) {
+			evaluationScores.forEach((score) => {
+				accuracy.push(score.accuracy)
+				completeness.push(score.completeness)
+				conciseness.push(score.conciseness)
+				relevance.push(score.relevance)
+			})
+		}
+
+		if (accuracy.length > 0) {
+			data.push([
+				evaluation.judge_model,
+				evaluation.subject_model,
+				calculateAverage(accuracy).toFixed(2),
+				calculateAverage(completeness).toFixed(2),
+				calculateAverage(conciseness).toFixed(2),
+				calculateAverage(relevance).toFixed(2)
+			])
+		}
+	}
+
+	return data
+}
+
 export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
-	const [scores, setScores] = useState<Tables<'scores'>[]>(initialScores)
+	const [data, setData] = useState<string[][]>(getDataFromScores(initialScores, evaluations))
 	// const selectedCategories = useRef(categoryOptions.map((option) => option.value))
 	const [selectedCategories, setSelectedCategories] = useState<string[]>(
 		categoryOptions.map((option) => option.value)
 	)
-	const data = []
-
-	if (scores.length > 0 && evaluations.length > 0) {
-		const groupedScores = Object.groupBy(scores, (item) => item.evaluation_id)
-		const groupedEvaluations = Object.groupBy(evaluations, (item) => item.id)
-
-		for (const evaluationId in groupedScores) {
-			const evaluationGroup = groupedEvaluations[evaluationId]
-			const evaluationScores = groupedScores[evaluationId]
-			if (!evaluationGroup || !evaluationScores || evaluationGroup.length === 0) continue
-			const evaluation = evaluationGroup[0]
-			const accuracy: number[] = []
-			const completeness: number[] = []
-			const conciseness: number[] = []
-			const relevance: number[] = []
-
-			if (evaluationScores) {
-				evaluationScores.forEach((score) => {
-					accuracy.push(score.accuracy)
-					completeness.push(score.completeness)
-					conciseness.push(score.conciseness)
-					relevance.push(score.relevance)
-				})
-			}
-
-			if (accuracy.length > 0) {
-				data.push([
-					evaluation.judge_model,
-					evaluation.subject_model,
-					calculateAverage(accuracy).toFixed(2),
-					calculateAverage(completeness).toFixed(2),
-					calculateAverage(conciseness).toFixed(2),
-					calculateAverage(relevance).toFixed(2)
-				])
-			}
-		}
-	}
-
-	function scoresDifferent(
-		scores: {
-			accuracy: number
-			categories: string[]
-			completeness: number
-			conciseness: number
-			created_at: string
-			evaluation_id: number
-			id: number
-			question_id: string
-			relevance: number
-		}[],
-		newScores: {
-			accuracy: number
-			categories: string[]
-			completeness: number
-			conciseness: number
-			created_at: string
-			evaluation_id: number
-			id: number
-			question_id: string
-			relevance: number
-		}[]
-	) {
-		try {
-			for (let i = 0; i < scores.length; i++) {
-				const score = scores[i]
-				const newScore = newScores[i]
-
-				if (!score || !newScore) {
-					return true
-				}
-
-				if (
-					score.accuracy !== newScore.accuracy ||
-					score.completeness !== newScore.completeness ||
-					score.conciseness !== newScore.conciseness ||
-					score.relevance !== newScore.relevance ||
-					!score.categories.every((cat) => newScore.categories.includes(cat)) ||
-					!newScore.categories.every((cat) => score.categories.includes(cat))
-				) {
-					return true
-				}
-			}
-		} catch (error) {
-			console.error('Error comparing scores:', error)
-		}
-		return false
-	}
 
 	async function handleCheckChange(
 		e: ChangeEvent<HTMLInputElement>,
@@ -124,13 +76,22 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 			? [...selectedCategories, option.value]
 			: selectedCategories.filter((cat) => cat !== option.value)
 
+		let now = Date.now()
+
 		setSelectedCategories(newSelectedCategories)
 
-		const newScores = initialScores.filter((score) => {
-			return score.categories.some((cat) => newSelectedCategories.includes(cat))
-		})
+		console.log(Date.now() - now)
 
-		setScores(newScores)
+		const newData = getDataFromScores(
+			initialScores.filter((score) => {
+				return score.categories.some((cat) => newSelectedCategories.includes(cat))
+			}),
+			evaluations
+		)
+
+		console.log(Date.now() - now)
+
+		setData(newData)
 	}
 
 	function isOnlyCheckmark(option: { value: string; label?: string }) {
@@ -159,7 +120,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				style={{ paddingTop: '4px', paddingBottom: '0' }}
 				className='pl-2 d-flex flex-row'>
 				{categoryOptions.map((option) => {
-					const elementId = `lb-${option.value}`
 					return (
 						<Form.Check
 							disabled={isOnlyCheckmark(option)}
@@ -174,7 +134,7 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 							defaultChecked={true}
 							label={option.label}
 							name={option.label}
-							id={elementId}
+							id={`lb-${option.value}`}
 						/>
 					)
 				})}
