@@ -4,6 +4,7 @@ import { Tables } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
 import { calculateAverage } from '@/lib/utils'
 import { Grid } from 'gridjs-react'
+import $ from 'jquery'
 import Form from 'react-bootstrap/Form'
 
 const categoryOptions = [
@@ -23,12 +24,16 @@ interface LeaderboardProps {
 
 export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 	const [scores, setScores] = useState<Tables<'scores'>[]>(initialScores)
-	const selectedCategories = useRef(categoryOptions.map((option) => option.value))
-	const supabase = createClient()
+	// const selectedCategories = useRef(categoryOptions.map((option) => option.value))
+	const [selectedCategories, setSelectedCategories] = useState<string[]>(
+		categoryOptions.map((option) => option.value)
+	)
 	const data = []
+
 	if (scores.length > 0 && evaluations.length > 0) {
 		const groupedScores = Object.groupBy(scores, (item) => item.evaluation_id)
 		const groupedEvaluations = Object.groupBy(evaluations, (item) => item.id)
+
 		for (const evaluationId in groupedScores) {
 			const evaluationGroup = groupedEvaluations[evaluationId]
 			const evaluationScores = groupedScores[evaluationId]
@@ -90,8 +95,7 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				const score = scores[i]
 				const newScore = newScores[i]
 
-				if (!score || !newScore)
-				{
+				if (!score || !newScore) {
 					return true
 				}
 
@@ -116,21 +120,21 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		e: ChangeEvent<HTMLInputElement>,
 		option: { value: string; label?: string }
 	) {
-		let categories
-		if (e.target.checked) {
-			categories = [...selectedCategories.current, option.value]
-		} else {
-			categories = selectedCategories.current.filter((cat) => cat !== option.value)
-		}
-		selectedCategories.current = categories
+		const newSelectedCategories = e.target.checked
+			? [...selectedCategories, option.value]
+			: selectedCategories.filter((cat) => cat !== option.value)
 
-		const newScores =
-			(await supabase.from('scores').select('*').overlaps('categories', categories)).data ??
-			[]
+		setSelectedCategories(newSelectedCategories)
 
-		if (scoresDifferent(scores, newScores)) {
-			setScores(newScores)
-		}
+		const newScores = initialScores.filter((score) => {
+			return score.categories.some((cat) => newSelectedCategories.includes(cat))
+		})
+
+		setScores(newScores)
+	}
+
+	function isOnlyCheckmark(option: { value: string; label?: string }) {
+		return selectedCategories.length === 1 && selectedCategories[0] === option.value
 	}
 
 	const columns = [
@@ -150,26 +154,30 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				color: '#171717',
 				borderRadius: '8px'
 			}}>
-			Dummy Data
+			<h1 className='text-red-700 text-lg'>Dummy Data</h1>
 			<Form
 				style={{ paddingTop: '4px', paddingBottom: '0' }}
 				className='pl-2 d-flex flex-row'>
-				{categoryOptions.map((option) => (
-					<Form.Check
-						className='pr-3'
-						onChange={(e) => {
-							handleCheckChange(e, option)
-						}}
-						style={{
-							color: '#171717'
-						}}
-						key={option.value}
-						defaultChecked={true}
-						label={option.label}
-						name={option.label}
-						id={`inline-${option.value}-`}
-					/>
-				))}
+				{categoryOptions.map((option) => {
+					const elementId = `lb-${option.value}`
+					return (
+						<Form.Check
+							disabled={isOnlyCheckmark(option)}
+							className='pr-3'
+							onChange={(e) => {
+								handleCheckChange(e, option)
+							}}
+							style={{
+								color: '#171717'
+							}}
+							key={option.value}
+							defaultChecked={true}
+							label={option.label}
+							name={option.label}
+							id={elementId}
+						/>
+					)
+				})}
 			</Form>
 			<Grid
 				style={{
