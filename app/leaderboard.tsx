@@ -63,7 +63,6 @@ function getDataFromScores(scores: Tables<'scores'>[], evaluations: Tables<'eval
 
 export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 	const [data, setData] = useState<string[][]>(getDataFromScores(initialScores, evaluations))
-	// const selectedCategories = useRef(categoryOptions.map((option) => option.value))
 	const [selectedCategories, setSelectedCategories] = useState<string[]>(
 		categoryOptions.map((option) => option.value)
 	)
@@ -76,11 +75,7 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 			? [...selectedCategories, option.value]
 			: selectedCategories.filter((cat) => cat !== option.value)
 
-		let now = Date.now()
-
 		setSelectedCategories(newSelectedCategories)
-
-		console.log(Date.now() - now)
 
 		const newData = getDataFromScores(
 			initialScores.filter((score) => {
@@ -88,8 +83,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 			}),
 			evaluations
 		)
-
-		console.log(Date.now() - now)
 
 		setData(newData)
 	}
