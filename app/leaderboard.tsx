@@ -4,6 +4,7 @@ import { Tables } from '@/lib/supabase/database.types'
 import { calculateAverage } from '@/lib/utils'
 import { Grid } from 'gridjs-react'
 import Form from 'react-bootstrap/Form'
+import { FaCircleExclamation } from 'react-icons/fa6'
 
 const categoryOptions = [
 	{ value: 'Nutrition', label: 'Nutrition' },
@@ -108,7 +109,10 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				color: '#171717',
 				borderRadius: '8px'
 			}}>
-			<h1 className='text-red-700 text-lg'>Dummy Data</h1>
+			<span style={{ fontSize: '50px', color: 'red' }}>
+				!!!Dummy Data!!!
+			</span>
+
 			<Form
 				style={{ paddingTop: '4px', paddingBottom: '0' }}
 				className='pl-2 d-flex flex-row'>
