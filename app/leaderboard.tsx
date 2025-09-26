@@ -62,7 +62,6 @@ function getDataFromScores(scores: Tables<'scores'>[], evaluations: Tables<'eval
 
 		if (accuracy.length > 0) {
 			data.push([
-				evaluation.judge_model,
 				evaluation.subject_model,
 				calculateAverage(accuracy).toFixed(2),
 				calculateAverage(completeness).toFixed(2),
@@ -144,7 +143,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				options={{ searching: false, paging: false, info: false, ordering: true }}>
 				<thead>
 					<tr>
-						<th>Judge Model</th>
 						<th>Subject Model</th>
 						<th>Accuracy</th>
 						<th>Completeness</th>
