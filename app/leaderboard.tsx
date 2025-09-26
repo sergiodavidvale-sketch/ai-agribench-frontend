@@ -138,6 +138,9 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				})}
 			</Form>
 
+			<style>
+			</style>
+			
 			<DataTable
 				data={data}
 				options={{ searching: false, paging: false, info: false, ordering: true }}>
