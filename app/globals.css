@@ -41,6 +41,15 @@
 	}
 }
 
+div.gridjs-wrapper {
+	border-width: 0 !important;
+	border-radius: 0 !important;
+}
+
+.form-check .form-check-input:not(:checked) {
+	background-color: #707372 !important;
+}
+
 .form-check {
 	display: inline-flex;
 	gap: 3px;
