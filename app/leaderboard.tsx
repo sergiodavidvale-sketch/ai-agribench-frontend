@@ -2,7 +2,6 @@
 import { ChangeEvent, useState } from 'react'
 import { Tables } from '@/lib/supabase/database.types'
 import { calculateAverage } from '@/lib/utils'
-import { Grid } from 'gridjs-react'
 import Form from 'react-bootstrap/Form'
 import dynamic from 'next/dynamic'
 import 'datatables.net-dt/css/dataTables.dataTables.css'
@@ -106,15 +105,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 		return selectedCategories.length === 1 && selectedCategories[0] === option.value
 	}
 
-	const columns = [
-		{ name: 'Judge Model', sort: true },
-		{ name: 'Subject Model', sort: true },
-		{ name: 'Accuracy', sort: true },
-		{ name: 'Completeness', sort: true },
-		{ name: 'Conciseness', sort: true },
-		{ name: 'Relevance', sort: true }
-	]
-
 	return (
 		<div
 			className='h-full d-flex flex-column'
@@ -124,21 +114,6 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 				borderRadius: '8px'
 			}}>
 			<span style={{ fontSize: '50px', color: 'red' }}>!!!Dummy Data!!!</span>
-
-			<DataTable
-				data={data}
-				options={{ searching: false, paging: false, info: false, ordering: true }}>
-				<thead>
-					<tr>
-						<th>Judge Model</th>
-						<th>Subject Model</th>
-						<th>Accuracy</th>
-						<th>Completeness</th>
-						<th>Conciseness</th>
-						<th>Relevance</th>
-					</tr>
-				</thead>
-			</DataTable>
 
 			<Form
 				style={{ paddingTop: '4px', paddingBottom: '0' }}
@@ -163,21 +138,21 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 					)
 				})}
 			</Form>
-			<Grid
-				style={{
-					td: {
-						color: '#171717',
-						backgroundColor: '#D3CDC6'
-					},
-					th: {
-						color: '#171717',
-						backgroundColor: '#C8C6C7'
-					}
-				}}
+
+			<DataTable
 				data={data}
-				sort={true}
-				columns={columns}
-			/>
+				options={{ searching: false, paging: false, info: false, ordering: true }}>
+				<thead>
+					<tr>
+						<th>Judge Model</th>
+						<th>Subject Model</th>
+						<th>Accuracy</th>
+						<th>Completeness</th>
+						<th>Conciseness</th>
+						<th>Relevance</th>
+					</tr>
+				</thead>
+			</DataTable>
 		</div>
 	)
 }
