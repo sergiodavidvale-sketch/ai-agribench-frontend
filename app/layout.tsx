@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Source_Sans_3 } from 'next/font/google'
-import './bootstrap.scss'
+import './bootstrap.css'
 import './globals.css'
 const defaultUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/leaderboard` : 'http://localhost:3000/leaderboard'
 

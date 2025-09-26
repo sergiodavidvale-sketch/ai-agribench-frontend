@@ -1,6 +1,5 @@
 import { Leaderboard } from './leaderboard'
 import { createClient } from '@/lib/supabase/server'
-import "gridjs/dist/theme/mermaid.css";
 
 export default async function LeaderboardPage() {
 	const supabase = await createClient()

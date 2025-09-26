@@ -18,7 +18,6 @@ export default async function ProtectedPage() {
 		const backendUrl = process.env.BACKEND_URL
 		const url = `${backendUrl}/evaluate`
 		const numProcesses = formData.get('numProcesses')
-		console.log(numProcesses)
 		await axios.post(url, {
 			withCredentials: true,
 			judge_model: formData.get('judgeModel'),
