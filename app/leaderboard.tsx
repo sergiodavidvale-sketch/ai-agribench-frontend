@@ -30,8 +30,8 @@ const DataTable = dynamic(
 )
 
 interface LeaderboardProps {
-	initialScores: Tables<'scores'>[] // Replace 'any[]' with the actual type if known
-	evaluations: Tables<'evaluations'>[] // Replace 'any[]' with the actual type if known
+	initialScores: Tables<'scores'>[]
+	evaluations: Tables<'evaluations'>[]
 }
 
 function getDataFromScores(scores: Tables<'scores'>[], evaluations: Tables<'evaluations'>[]) {
@@ -51,14 +51,12 @@ function getDataFromScores(scores: Tables<'scores'>[], evaluations: Tables<'eval
 		const conciseness: number[] = []
 		const relevance: number[] = []
 
-		if (evaluationScores) {
-			evaluationScores.forEach((score) => {
-				accuracy.push(score.accuracy)
-				completeness.push(score.completeness)
-				conciseness.push(score.conciseness)
-				relevance.push(score.relevance)
-			})
-		}
+		evaluationScores.forEach((score) => {
+			accuracy.push(score.accuracy)
+			completeness.push(score.completeness)
+			conciseness.push(score.conciseness)
+			relevance.push(score.relevance)
+		})
 
 		if (accuracy.length > 0) {
 			data.push([
@@ -105,55 +103,67 @@ export function Leaderboard({ initialScores, evaluations }: LeaderboardProps) {
 	}
 
 	return (
-		<div
-			className='h-full d-flex flex-column'
-			style={{
-				backgroundColor: '#D3CDC6',
-				color: '#171717',
-				borderRadius: '8px'
-			}}>
-			<span style={{ fontSize: '50px', color: 'red' }}>!!!Dummy Data!!!</span>
+		<main style={{ minHeight: '100vh', background: '#f6f7f9', color: '#172033', padding: '32px' }}>
+			<section style={{ maxWidth: '1180px', margin: '0 auto' }}>
+				<div style={{ marginBottom: '24px' }}>
+					<p style={{ margin: 0, fontSize: '13px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#667085', fontWeight: 700 }}>
+						AI-AgriBench
+					</p>
+					<h1 style={{ margin: '6px 0 8px', fontSize: '34px', lineHeight: 1.15, fontWeight: 800 }}>
+						Agricultural AI Evaluation Leaderboard
+					</h1>
+					<p style={{ margin: 0, maxWidth: '760px', color: '#667085', fontSize: '15px' }}>
+						Comparative view of model performance across agronomic evaluation criteria and thematic categories.
+					</p>
+				</div>
 
-			<Form
-				style={{ paddingTop: '4px', paddingBottom: '0' }}
-				className='pl-2 d-flex flex-row'>
-				{categoryOptions.map((option) => {
-					return (
-						<Form.Check
-							disabled={isOnlyCheckmark(option)}
-							className='pr-3'
-							onChange={(e) => {
-								handleCheckChange(e, option)
-							}}
-							style={{
-								color: '#171717'
-							}}
-							key={option.value}
-							defaultChecked={true}
-							label={option.label}
-							name={option.label}
-							id={`lb-${option.value}`}
-						/>
-					)
-				})}
-			</Form>
+				<div style={{ background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '18px', boxShadow: '0 12px 30px rgba(16, 24, 40, 0.06)', overflow: 'hidden' }}>
+					<div style={{ padding: '18px 22px', borderBottom: '1px solid #e5e7eb' }}>
+						<div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '12px' }}>Filter by agronomic category</div>
+						<Form style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 18px', margin: 0 }}>
+							{categoryOptions.map((option) => {
+								return (
+									<Form.Check
+										disabled={isOnlyCheckmark(option)}
+										onChange={(e) => {
+											handleCheckChange(e, option)
+										}}
+										style={{ color: '#344054', fontSize: '14px' }}
+										key={option.value}
+										defaultChecked={true}
+										label={option.label}
+										name={option.label}
+										id={`lb-${option.value}`}
+									/>
+								)
+							})}
+						</Form>
+					</div>
 
-			<style>
-			</style>
-			
-			<DataTable
-				data={data}
-				options={{ searching: false, paging: false, info: false, ordering: true }}>
-				<thead>
-					<tr>
-						<th>Subject Model</th>
-						<th>Accuracy</th>
-						<th>Completeness</th>
-						<th>Conciseness</th>
-						<th>Relevance</th>
-					</tr>
-				</thead>
-			</DataTable>
-		</div>
+					<div style={{ padding: '18px 22px 24px' }}>
+						<style>{`
+							.dataTable { width: 100% !important; border-collapse: collapse !important; }
+							.dataTable thead th { background: #f9fafb; color: #344054; font-size: 13px; padding: 14px 12px !important; border-bottom: 1px solid #e5e7eb !important; }
+							.dataTable tbody td { padding: 14px 12px !important; border-bottom: 1px solid #eef0f3 !important; font-size: 14px; }
+							.dataTable tbody tr:hover { background: #f9fafb; }
+						`}</style>
+
+						<DataTable
+							data={data}
+							options={{ searching: false, paging: false, info: false, ordering: true }}>
+							<thead>
+								<tr>
+									<th>Subject Model</th>
+									<th>Accuracy</th>
+									<th>Completeness</th>
+									<th>Conciseness</th>
+									<th>Relevance</th>
+								</tr>
+							</thead>
+						</DataTable>
+					</div>
+				</div>
+			</section>
+		</main>
 	)
 }
